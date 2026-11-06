@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Настройки профиля · Почему онлайн{% endblock %}
+{% load static %}
+{% block content %}
+
+            <div class="mb-5">
+                <span class="fs-2">Настройки: </span>
+                <span class="fs-2 ms-3">Человек Человекович</span>
+            </div>
+
+            <div class="row g-3 align-items-start mb-3">
+                <div class="col-12 col-sm-2">
+                  <label for="inputlogin" class="col-form-label">Логин</label>
+                </div>
+                <div class="col-12 col-sm-5">
+                  <input type="login" id="inputlogin" class="form-control" title="Введите свой уникальный логин">
+                </div>
+            </div>
+            
+            <div class="row g-3 align-items-start mb-3">
+                <div class="col-12 col-sm-2">
+                  <label for="inputmail" class="col-form-label">Эл. Почта</label>
+                </div>
+                <div class="col-12 col-sm-5">
+                    <input type="mail" id="inputmail" class="form-control" title="Введите свою электронную почту">
+                </div>
+            </div>
+
+            <div class="row g-3 align-items-start mb-3">
+                <div class="col-12 col-sm-2">
+                  <label for="inputnick" class="col-form-label">Имя</label>
+                </div>
+                <div class="col-12 col-sm-5">
+                  <input type="nick" id="inputnick" class="form-control" title="Введите своё имя которое будет отображаться на сайте">
+                </div>
+            </div>
+
+            <div class="row g-3 align-items-start mb-3">
+                <div class="col-12 col-sm-2">
+                  <label for="inputavatar" class="col-form-label">Аватар</label>
+                </div>
+                <div class="col-12 col-sm-5">
+                    <img src="{% static 'questions/img/image.png' %}" id="inputavatar" class="img-fluid w-50" alt="avatar image">
+                </div>
+            </div>
+
+            <div class="row g-3 align-items-start mb-3">
+                <div class="d-none d-sm-block col-sm-2"></div>
+                <div class="col-12 col-sm-5">
+                    <div class="input-group">
+                        <input class="form-control" type="file" id="formFile" title="Нажмите, чтобы выбрать файл">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 align-items-start mb-3">
+                <div class="d-none d-sm-block col-sm-2"></div>
+                <div class="col-12 col-sm-5">
+                    <button class="btn btn-primary" type="submit">Сохранить</button>
+                </div>
+            </div>
+        
+        
+{% endblock %}

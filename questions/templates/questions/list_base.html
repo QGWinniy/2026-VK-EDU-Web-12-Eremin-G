@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}{{ heading }} · Почему онлайн{% endblock %}
+{% block content %}
+  <div class="mb-3">
+    <span class="fs-2">{{ heading }}</span>
+    <a href="{% url 'questions:hot' %}" class="fs-4 ms-2">Горячие вопросики</a>
+  </div>
+  {% for question in page_obj %}
+    {% include 'questions/includes/question_card.html' with question=question %}
+  {% empty %}
+    <p>Пока нет вопросов по этому тегу.</p>
+  {% endfor %}
+  {% include 'includes/pagination.html' with page_obj=page_obj %}
+{% endblock %}

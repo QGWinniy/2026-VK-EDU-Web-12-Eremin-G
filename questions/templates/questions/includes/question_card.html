@@ -1,0 +1,20 @@
+{% load static %}
+<div class="row mb-3 bg-light p-3 d-flex card-body">
+  <div class="col-3 col-sm-2">
+    <img src="{% static 'questions/img/image.png' %}" alt="Аватар автора" class="img-fluid ing-thumbnail mb-2">
+    <div class="d-flex flex-column">
+      <button class="btn btn-primary" type="button">{{ question.score }} ♥</button>
+    </div>
+  </div>
+  <div class="col-9 col-sm-10 d-flex flex-column">
+    <h2 class="h5 card-title mb-3"><a href="{% url 'questions:question' question.id %}">{{ question.title }}</a></h2>
+    <p class="card-text">{{ question.text }}</p>
+    <div class="row mt-auto">
+      <div class="col-12 col-sm-5"><a href="{% url 'questions:question' question.id %}" class="card-link">Ответы: {{ question.answers_count }}</a></div>
+      <div class="col-12 col-sm-5">
+        <span>Тег: </span>
+        {% for tag_name in question.tags %}<a href="{% url 'questions:tag' tag_name %}" class="card-link">{{ tag_name }}</a>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>

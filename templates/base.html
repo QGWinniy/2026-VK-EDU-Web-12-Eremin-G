@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Почему онлайн{% endblock %}</title>
+  <link href="{% static 'questions/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="icon" type="image/png" href="{% static 'questions/img/image.png' %}">
+</head>
+<body class="min-vh-100 d-flex flex-column">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3 py-3">
+    <div class="container-fluid row align-items-center g-2 mx-0">
+      <div class="col-6 col-lg-3 order-1">
+        <a class="navbar-brand" href="{% url 'questions:index' %}">Почему онлайн</a>
+      </div>
+      <form class="col-12 col-lg-4 d-flex align-items-center justify-content-center order-3 order-lg-2" action="{% url 'questions:index' %}" method="get">
+        <input class="form-control me-2 w-50" type="search" name="q" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+        <a href="{% url 'questions:ask' %}" class="btn btn-primary ms-2">Спросить</a>
+      </form>
+      <div class="col-6 col-lg-5 d-flex justify-content-end order-2 order-lg-3">
+        {% if show_user_profile or request.user.is_authenticated %}
+          <img src="{% static 'questions/img/image.png' %}" alt="Avatar" class="rounded-circle" width="60" height="60">
+          <div class="d-flex flex-column ms-2">
+            <p class="mb-1">Человек Человекович</p>
+            <a href="{% url 'core:profile' %}" class="card-link">Настройки</a>
+            <a href="{% url 'questions:index' %}" class="card-link">Выйти</a>
+          </div>
+        {% else %}
+          <div class="d-flex align-items-center">
+            <a href="{% url 'core:login' %}" class="card-link">Войти</a>
+            <a href="{% url 'core:signup' %}" class="card-link ms-4">Зарегистрироваться</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <main class="container-fluid flex-grow-1">
+    <div class="row g-5 mx-0 px-4">
+      <section class="col-12 col-xl-7 ms-xl-3">
+        {% block content %}{% endblock %}
+      </section>
+      <aside class="col-12 col-xl-4">
+        {% include 'includes/sidebar.html' %}
+      </aside>
+    </div>
+  </main>
+
+  <footer class="text-center text-secondary py-3 mt-4 border-top">
+    <small>Почему онлайн · учебный проект</small>
+  </footer>
+  <script src="{% static 'questions/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

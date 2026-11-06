@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ question.title }} · Почему онлайн{% endblock %}
+{% block content %}
+  <div class="row p-3 d-flex card-body">
+    <div class="col-3 col-sm-2">
+      <img src="{% static 'questions/img/image.png' %}" alt="Аватар автора" class="img-fluid ing-thumbnail mb-2">
+      <div class="d-flex flex-column"><button class="btn btn-primary" type="button">{{ question.score }} ♥</button></div>
+    </div>
+    <div class="col-9 col-sm-10 d-flex flex-column">
+      <h1 class="h3 card-title">{{ question.title }}</h1>
+      <p class="card-text">{{ question.text }}</p>
+      <div class="mt-auto"><span>Тег: </span>{% for tag_name in question.tags %}<a href="{% url 'questions:tag' tag_name %}" class="card-link">{{ tag_name }}</a>{% endfor %}</div>
+      <small class="text-secondary mt-2">Ответов: {{ question.answers_count }}</small>
+    </div>
+  </div>
+  <hr class="my-4 border-primary">
+  <h2 class="h3 mb-3">Ответы</h2>
+  {% for answer in page_obj %}
+    <div class="row mb-3 bg-light p-3 d-flex card-body">
+      <div class="col-3 col-sm-2">
+        <img src="{% static 'questions/img/image.png' %}" alt="Аватар автора" class="img-fluid ing-thumbnail mb-2 w-75">
+        <div class="d-flex flex-column w-75"><button class="btn btn-primary" type="button">{{ answer.id }} ♥</button></div>
+      </div>
+      <div class="col-9 col-sm-10 d-flex flex-column">
+        <p class="card-text">{{ answer.text }}</p>
+        <div class="form-check mt-auto">
+          <input class="form-check-input" type="checkbox" value="1" id="correct-{{ answer.id }}" {% if answer.is_correct %}checked{% endif %}>
+          <label class="form-check-label" for="correct-{{ answer.id }}">Правильно</label>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  {% include 'includes/pagination.html' with page_obj=page_obj %}
+  <hr class="my-4 border-primary">
+  <form class="mb-3 w-100 bg-light p-3 card-body" method="post">{% csrf_token %}
+    <label class="form-label" for="answer-text">Ваш ответ</label>
+    <textarea class="form-control" id="answer-text" name="answer" rows="2" placeholder="Напишите ответ"></textarea>
+    <button class="btn btn-primary mt-2" type="submit">Ответить</button>
+  </form>
+{% endblock %}
