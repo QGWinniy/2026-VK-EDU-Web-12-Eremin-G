@@ -1,0 +1,16 @@
+{% if user.is_authenticated %}
+  <form class="d-flex flex-wrap align-items-center gap-1" method="post" action="{{ vote_url }}" data-vote>
+    {% csrf_token %}
+    <input type="hidden" name="id" value="{{ item.pk }}">
+    <button class="btn btn-sm btn-outline-primary" name="value" value="1" type="submit" title="Лайк" aria-label="Лайк" {% if item.user_vote == 1 %}disabled{% endif %}>+</button>
+    <span data-score aria-live="polite">{{ item.score }}</span>
+    <button class="btn btn-sm btn-outline-primary" name="value" value="-1" type="submit" title="Дизлайк" aria-label="Дизлайк" {% if item.user_vote == -1 %}disabled{% endif %}>−</button>
+    <small class="text-danger w-100" data-error role="alert"></small>
+  </form>
+{% else %}
+  <div class="d-flex flex-wrap align-items-center gap-1" title="Войдите, чтобы оценить">
+    <button class="btn btn-sm btn-outline-primary" type="button" aria-label="Лайк" disabled>+</button>
+    <span>{{ item.score }}</span>
+    <button class="btn btn-sm btn-outline-primary" type="button" aria-label="Дизлайк" disabled>−</button>
+  </div>
+{% endif %}

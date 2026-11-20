@@ -5,7 +5,8 @@
   <div class="row p-3 d-flex card-body">
     <div class="col-3 col-sm-2">
       {% include 'questions/includes/avatar.html' with author=question.author only %}
-      <div class="d-flex flex-column"><button class="btn btn-primary" type="button">{{ question.score }} ♥</button></div>
+      {% url 'questions:question_vote' as vote_url %}
+      {% include 'questions/includes/vote.html' with item=question %}
     </div>
     <div class="col-9 col-sm-10 d-flex flex-column">
       <h1 class="h3 card-title">{{ question.title }}</h1>
@@ -16,19 +17,38 @@
   </div>
   <hr class="my-4 border-primary">
   <h2 class="h3 mb-3">Ответы</h2>
+  {% url 'questions:answer_vote' as vote_url %}
   {% for answer in page_obj %}
-    <div class="row mb-3 bg-light p-3 d-flex card-body">
+    <div class="row mb-3 bg-light p-3 d-flex card-body" id="answer-{{ answer.pk }}" data-answer>
       <div class="col-3 col-sm-2">
         {% include 'questions/includes/avatar.html' with author=answer.author only %}
-        <div class="d-flex flex-column w-75"><button class="btn btn-primary" type="button">{{ answer.score }} ♥</button></div>
+        {% include 'questions/includes/vote.html' with item=answer %}
       </div>
       <div class="col-9 col-sm-10 d-flex flex-column">
         <p class="card-text">{{ answer.text }}</p>
-        {% if answer.is_correct %}<p class="text-success mb-2">Правильный ответ</p>{% endif %}
+        <p class="text-success mb-2" data-correct-label {% if not answer.is_correct %}hidden{% endif %}>Правильный ответ</p>
+        {% if user.pk == question.author_id %}
+          <form method="post" action="{% url 'questions:correct_answer' %}" data-correct>
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="{{ question.pk }}">
+            <input type="hidden" name="answer_id" value="{{ answer.pk }}">
+            <button class="btn btn-sm btn-outline-success" type="submit" {% if answer.is_correct %}disabled{% endif %}>✓ Правильный ответ</button>
+            <small class="text-danger" data-error role="alert"></small>
+          </form>
+        {% endif %}
       </div>
     </div>
   {% empty %}
     <p>Пока нет ни одного ответа к этому вопросу.</p>
   {% endfor %}
   {% include 'includes/pagination.html' with page_obj=page_obj %}
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <fieldset {% if not user.is_authenticated %}disabled{% endif %}>
+      {% include 'includes/form_fields.html' %}
+      <span {% if not user.is_authenticated %}title="Войдите, чтобы ответить на вопрос"{% endif %}>
+        <button type="submit" class="btn btn-primary">Ответить</button>
+      </span>
+    </fieldset>
+  </form>
 {% endblock %}

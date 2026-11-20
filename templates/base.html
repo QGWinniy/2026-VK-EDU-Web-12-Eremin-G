@@ -17,19 +17,27 @@
       <form class="col-12 col-lg-4 d-flex align-items-center justify-content-center order-3 order-lg-2" action="{% url 'questions:index' %}" method="get">
         <input class="form-control me-2 w-50" type="search" name="q" placeholder="Search" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Search</button>
-        <a href="{% url 'questions:ask' %}" class="btn btn-primary ms-2">Спросить</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'questions:ask' %}" class="btn btn-primary ms-2">Спросить</a>
+        {% else %}
+          <span class="ms-2" title="Войдите, чтобы задать вопрос"><button class="btn btn-primary" type="button" disabled>Спросить</button></span>
+        {% endif %}
       </form>
       <div class="col-6 col-lg-5 d-flex justify-content-end order-2 order-lg-3">
-        {% if show_user_profile or request.user.is_authenticated %}
-          <img src="{% static 'questions/img/image.png' %}" alt="Avatar" class="rounded-circle" width="60" height="60">
+        {% if user.is_authenticated %}
+          <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'questions/img/image.png' %}{% endif %}" alt="Аватар" class="rounded-circle object-fit-cover" width="60" height="60">
           <div class="d-flex flex-column ms-2">
-            <p class="mb-1">Человек Человекович</p>
+            <p class="mb-1">{{ user.first_name|default:user.username }}</p>
             <a href="{% url 'core:profile' %}" class="card-link">Настройки</a>
-            <a href="{% url 'questions:index' %}" class="card-link">Выйти</a>
+            <form method="post" action="{% url 'core:logout' %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="btn btn-link p-0 align-baseline" type="submit">Выйти</button>
+            </form>
           </div>
         {% else %}
           <div class="d-flex align-items-center">
-            <a href="{% url 'core:login' %}" class="card-link">Войти</a>
+            <a href="{% url 'core:login' %}{% if request.resolver_match.url_name != 'login' %}?next={{ request.get_full_path|urlencode:'' }}{% endif %}" class="card-link">Войти</a>
             <a href="{% url 'core:signup' %}" class="card-link ms-4">Зарегистрироваться</a>
           </div>
         {% endif %}
@@ -54,5 +62,6 @@
     <small>Почему онлайн · учебный проект</small>
   </footer>
   <script src="{% static 'questions/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'questions/js/actions.js' %}" defer></script>
 </body>
 </html>

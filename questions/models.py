@@ -1,16 +1,16 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import Count, OuterRef, Subquery, Value
+from django.db.models import Count, OuterRef, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 
 
-def related_count(model, field):
-    counts = (
+def related_total(model, field, aggregate):
+    totals = (
         model.objects.filter(**{field: OuterRef('pk')}).order_by()
-        .values(field).annotate(total=Count('*')).values('total')
+        .values(field).annotate(total=aggregate).values('total')
     )
-    return Coalesce(Subquery(counts), Value(0))
+    return Coalesce(Subquery(totals), Value(0))
 
 
 class TagQuerySet(models.QuerySet):
@@ -39,20 +39,21 @@ class Tag(models.Model):
 
 
 class QuestionQuerySet(models.QuerySet):
-    def for_display(self):
-        return self.select_related('author__profile').prefetch_related('tags').annotate(
-            score=related_count(QuestionLike, 'question_id'),
-            answers_count=related_count(Answer, 'question_id'),
+    def for_display(self, user=None):
+        questions = self.select_related('author__profile').prefetch_related('tags').annotate(
+            score=related_total(QuestionLike, 'question_id', Sum('value')),
+            answers_count=related_total(Answer, 'question_id', Count('*')),
         )
+        return with_user_vote(questions, QuestionLike, 'question_id', user)
 
-    def newest(self):
-        return self.for_display().order_by('-created_at', '-pk')
+    def newest(self, user=None):
+        return self.for_display(user).order_by('-created_at', '-pk')
 
-    def best(self):
-        return self.for_display().order_by('-score', '-created_at', '-pk')
+    def best(self, user=None):
+        return self.for_display(user).order_by('-score', '-created_at', '-pk')
 
-    def by_tag(self, tag):
-        return self.newest().filter(tags=tag)
+    def by_tag(self, tag, user=None):
+        return self.newest(user).filter(tags=tag)
 
 
 class Question(models.Model):
@@ -80,10 +81,11 @@ class Question(models.Model):
 
 
 class AnswerQuerySet(models.QuerySet):
-    def for_question(self, question):
-        return self.filter(question=question).select_related('author__profile').annotate(
-            score=related_count(AnswerLike, 'answer_id'),
+    def for_question(self, question, user=None):
+        answers = self.filter(question=question).select_related('author__profile').annotate(
+            score=related_total(AnswerLike, 'answer_id', Sum('value')),
         ).order_by('-is_correct', 'created_at', 'pk')
+        return with_user_vote(answers, AnswerLike, 'answer_id', user)
 
 
 class Answer(models.Model):
@@ -109,6 +111,7 @@ class Answer(models.Model):
 
 
 class QuestionLike(models.Model):
+    value = models.SmallIntegerField(default=1)
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name='likes', verbose_name='вопрос',
     )
@@ -124,6 +127,7 @@ class QuestionLike(models.Model):
 
 
 class AnswerLike(models.Model):
+    value = models.SmallIntegerField(default=1)
     answer = models.ForeignKey(
         Answer, on_delete=models.CASCADE, related_name='likes', verbose_name='ответ',
     )
@@ -136,3 +140,10 @@ class AnswerLike(models.Model):
         verbose_name = 'лайк ответа'
         verbose_name_plural = 'лайки ответов'
         unique_together = [('answer', 'user')]
+
+
+def with_user_vote(objects, model, field, user):
+    if user is not None and user.is_authenticated:
+        vote = model.objects.filter(user=user, **{field: OuterRef('pk')}).values('value')
+        return objects.annotate(user_vote=Subquery(vote))
+    return objects
