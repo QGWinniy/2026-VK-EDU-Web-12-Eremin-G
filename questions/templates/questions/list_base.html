@@ -3,12 +3,17 @@
 {% block content %}
   <div class="mb-3">
     <span class="fs-2">{{ heading }}</span>
-    <a href="{% url 'questions:hot' %}" class="fs-4 ms-2">Горячие вопросики</a>
+    {% if request.resolver_match.url_name == 'hot' %}
+      <a href="{% url 'questions:index' %}" class="fs-4 ms-2">Новые вопросы</a>
+    {% else %}
+      <a href="{% url 'questions:hot' %}" class="fs-4 ms-2">Горячие вопросики</a>
+    {% endif %}
   </div>
   {% for question in page_obj %}
     {% include 'questions/includes/question_card.html' with question=question %}
   {% empty %}
-    <p>Пока нет вопросов по этому тегу.</p>
+    {% if active_tag %}<p>Пока нет вопросов по этому тегу.</p>
+    {% else %}<p>Пока нет ни одного вопроса.</p>{% endif %}
   {% endfor %}
   {% include 'includes/pagination.html' with page_obj=page_obj %}
 {% endblock %}

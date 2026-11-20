@@ -1,62 +1,40 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
+from .models import Answer, Question, Tag
 from .pagination import paginate
+from .shortcuts import render_with_popular_tags
 
 
-TAGS = ['python', 'django', 'web', 'sql', 'linux', 'html', 'css']
-AUTHORS = ['Алексей', 'Мария', 'Иван', 'Ольга']
-
-
-def sample_questions():
-    return [
-        {
-            'id': number,
-            'title': 'Почему не работает си',
-            'text': 'gcc выдаёт ошибку bash: gcc: command not found. Что это? Стоит ли продолжить писать на Си или лучше перейти на Python?',
-            'answers_count': (number * 3) % 12,
-            'tags': [TAGS[number % len(TAGS)], TAGS[(number + 2) % len(TAGS)]],
-            'author': AUTHORS[number % len(AUTHORS)],
-            'score': 10 + number % 9,
-            'created_at': '2 часа назад',
-        }
-        for number in range(1, 36)
-    ]
+def render_list(request, template, questions, heading, **context):
+    page = paginate(questions, request)
+    return render_with_popular_tags(request, template, page_obj=page, heading=heading, **context)
 
 
 def index(request):
-    page = paginate(sample_questions(), request, per_page=10)
-    return render(request, 'questions/index.html', {'page_obj': page, 'heading': 'Новые вопросы'})
+    return render_list(
+        request, 'questions/index.html', Question.objects.newest(), 'Новые вопросы',
+    )
 
 
 def hot(request):
-    questions = sorted(sample_questions(), key=lambda item: item['score'], reverse=True)
-    page = paginate(questions, request, per_page=10)
-    return render(request, 'questions/hot.html', {'page_obj': page, 'heading': 'Горячие вопросики'})
+    return render_list(
+        request, 'questions/hot.html', Question.objects.best(), 'Горячие вопросики',
+    )
 
 
 def tag(request, tag):
-    questions = [item for item in sample_questions() if tag in item['tags']]
-    page = paginate(questions, request, per_page=10)
-    return render(request, 'questions/tag.html', {
-        'page_obj': page,
-        'heading': f'Вопросы по тегу: {tag}',
-        'active_tag': tag,
-    })
+    active_tag = get_object_or_404(Tag, slug=tag)
+    return render_list(
+        request, 'questions/tag.html', Question.objects.by_tag(active_tag),
+        f'Вопросы по тегу: {active_tag.name}', active_tag=active_tag,
+    )
 
 
 def question(request, question_id):
-    questions = sample_questions()
-    question_data = next((item for item in questions if item['id'] == question_id), questions[0])
-    answers = [
-        {'id': number, 'text': f'Вариант ответа {number}: попробуйте разбить задачу на небольшие шаги.',
-         'author': AUTHORS[number % len(AUTHORS)], 'created_at': '1 час назад', 'is_correct': number == 1}
-        for number in range(1, 18)
-    ]
-    return render(request, 'questions/question.html', {
-        'question': question_data,
-        'page_obj': paginate(answers, request, per_page=5),
-    })
+    question = get_object_or_404(Question.objects.for_display(), pk=question_id)
+    page = paginate(Answer.objects.for_question(question), request, per_page=5)
+    return render_with_popular_tags(request, 'questions/question.html', question=question, page_obj=page)
 
 
 def ask(request):
-    return render(request, 'questions/ask.html')
+    return render_with_popular_tags(request, 'questions/ask.html')

@@ -1,0 +1,3 @@
+{% load static %}
+<img src="{% if author.profile.avatar %}{{ author.profile.avatar.url }}{% else %}{% static 'questions/img/image.png' %}{% endif %}"
+     alt="Аватар автора" class="img-fluid img-thumbnail mb-2">

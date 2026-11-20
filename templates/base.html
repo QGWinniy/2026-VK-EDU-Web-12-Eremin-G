@@ -39,12 +39,14 @@
 
   <main class="container-fluid flex-grow-1">
     <div class="row g-5 mx-0 px-4">
-      <section class="col-12 col-xl-7 ms-xl-3">
+      <section class="col-12 col-xl-7 {% if show_popular_tags %}ms-xl-3{% else %}mx-auto{% endif %}">
         {% block content %}{% endblock %}
       </section>
-      <aside class="col-12 col-xl-4">
-        {% include 'includes/sidebar.html' %}
-      </aside>
+      {% if show_popular_tags %}
+        <aside class="col-12 col-xl-4">
+          {% include 'includes/sidebar.html' %}
+        </aside>
+      {% endif %}
     </div>
   </main>
 

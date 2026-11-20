@@ -6,10 +6,14 @@
     {% else %}
       <li class="page-item disabled"><span class="page-link">Предыдущая</span></li>
     {% endif %}
-    {% for number in page_obj.paginator.page_range %}
+    {% for number in page_obj.navigation %}
+      {% if number == page_obj.paginator.ELLIPSIS %}
+      <li class="page-item disabled"><span class="page-link">{{ number }}</span></li>
+      {% else %}
       <li class="page-item {% if number == page_obj.number %}active{% endif %}">
         <a class="page-link" href="?page={{ number }}">{{ number }}</a>
       </li>
+      {% endif %}
     {% endfor %}
     {% if page_obj.has_next %}
       <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a></li>
